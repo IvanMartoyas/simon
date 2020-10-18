@@ -1,53 +1,55 @@
 <template>
   <div id="app">
-        <div>
-        <div 
-          class="panel top-left-panel" 
-          @click="button(1)"
-          :class="{ hovElloy: isElloy }"
-          ></div>
-        <div 
-          class="panel top-right-panel" 
-          @click="button(2)"
-          :class="{ hovGreen: ishovGreen }"
+    <audio ref="audio" :src="sound_path"></audio>
+
+    <div>
+      <div 
+        class="panel top-left-panel" 
+        @click="button(1)"
+        :class="{ hovElloy: isElloy }"
         ></div>
-      </div>
-      <div>
-          <div 
-            class="panel bottom-left-panel" 
-            @click="button(4)"
-            :class="{ hovBlue: ishovBlue }"
-          ></div>
-          <div 
-            class="panel bottom-right-panel" 
-            @click="button(3)"
-            :class="{ hovRed: ishovRed }"
-          ></div>
-      </div>
-      <div class="center">
-          <div class="wrapper">
-            <div class="title">Simon the game</div>
-            <div class="round">{{seriesCount}}</div> 
-            <div>
-              <form class="radio">
-                <div class="radio__input">
-                  <input name="radio" type="radio" id="difficlt1" value="1" v-model="difficlty">
-                  <label for="difficlt1">Легкий</label>
-                </div>
-                <div class="radio__input">
-                  <input name="radio"  type="radio" id="difficlt2" value="2" v-model="difficlty">
-                  <label for="difficlt2">Средний</label>
-                </div>
-                <div class="radio__input">
-                  <input name="radio"  type="radio" id="difficlt3" value="3" v-model="difficlty">
-                  <label for="difficlt3">Сложный</label>
-                </div>
-              </form>
+      <div 
+        class="panel top-right-panel" 
+        @click="button(2)"
+        :class="{ hovGreen: ishovGreen }"
+      ></div>
+    </div>
+    <div class="buttons_bottom">
+        <div 
+          class="panel bottom-left-panel" 
+          @click="button(4)"
+          :class="{ hovBlue: ishovBlue }"
+        ></div>
+        <div 
+          class="panel bottom-right-panel" 
+          @click="button(3)"
+          :class="{ hovRed: ishovRed }"
+        ></div>
+    </div>
+    <div class="center">
+      <div class="wrapper">
+        <div class="title">Simon the game</div>
+        <div class="round">{{seriesCount}}</div> 
+        <div>
+          <form class="radio">
+            <div class="radio__input">
+              <input name="radio" type="radio" id="difficlt1" value="1" v-model="difficlty">
+              <label for="difficlt1">Легкий</label>
             </div>
-            <div class="start" @click="startGame">Старт</div>
-            <div class="gameOver" v-if="gameOver">Конец игры</div>
+            <div class="radio__input">
+              <input name="radio"  type="radio" id="difficlt2" value="2" v-model="difficlty">
+              <label for="difficlt2">Средний</label>
+            </div>
+            <div class="radio__input">
+              <input name="radio"  type="radio" id="difficlt3" value="3" v-model="difficlty">
+              <label for="difficlt3">Сложный</label>
+            </div>
+          </form>
         </div>
+        <div class="start" @click="startGame">Старт</div>
+        <div class="gameOver" v-if="gameOver">Конец игры</div>
       </div>
+    </div>
   </div>
 </template>
 
@@ -67,11 +69,13 @@ export default {
         ishovBlue: false,
         ishovRed: false,
         difficlty: 1,
-        time: 1500
+        time: 1500,
+        sound_path: ''
       }
   },
   watch: {
     difficlty() {
+
       if(this.difficlty == 1) {
         this.time = 1500
       }
@@ -81,6 +85,8 @@ export default {
       else {
         this.time = 400
       }
+
+      this.startGame()
     }
   },
   methods: {
@@ -88,33 +94,32 @@ export default {
       if (!this.allowInput)// если сейчас можно 
         return
 
+        this.makeSound(value)// при нажатии клавиши дать звук
 
-        if(value === this.series[this.count]) {
+        if(value === this.series[this.count]) {// сравниваю номер нажатой кнопки с номером который задал серия
 
-          console.log("OK")
+          // console.log("OK")
           this.count++;
 
-          if(this.count == this.series.length) {
+          if(this.count == this.series.length) {// если серия кончилась, начинаю новую
             this.seriesCount +=1
             this.count = 0
             this.series = []
             this.playSeries()
           }               
         }
-        else {
+        else {// если нажата непрвильная кнопка то конец игры
           this.allowInput = false;
           this.gameOver = true;
         }
-    
-      console.log(value)
-
     },
-    reset() {
+    reset() {// сброс настроек
       this.count = 0
       this.series = []
       this.allowInput = false
       this.seriesCount = 1
       this.gameOver = false
+      this.sound_path = ''
     },
     resetHov(){
       this.isElloy = false;
@@ -134,7 +139,7 @@ export default {
       // console.log("series " +this.series)
 
       //show series
-      let self = this// save this
+      let self = this// save this, в таймере привязка к this меняется на this таймера
 
       let i = 0;
       let intervalID = setInterval(function(){
@@ -142,6 +147,8 @@ export default {
           clearInterval(intervalID);
         }
         self.resetHov()
+
+        self.makeSound(self.series[i])
 
         switch (self.series[i]) {
           case 1:
@@ -166,11 +173,41 @@ export default {
     startGame() {
       // console.log()
       this.reset();
+      this.resetHov();
       this.playSeries(); 
     },
     getRandomFloat() {
       return Math.floor(Math.random() * (5 - 1) + 1);
     },
+    makeSound(number_button) {
+              // если кнопка нажата
+        switch (number_button) {
+          case 1:
+            this.$refs.audio.src = require("@/assets/audio/1.mp3")
+            this.$refs.audio.pause()
+            this.$refs.audio.currentTime = 0
+            this.$refs.audio.play()
+            break;
+          case 2:
+            this.$refs.audio.src = require("@/assets/audio/2.mp3")
+            this.$refs.audio.pause()
+            this.$refs.audio.currentTime = 0
+            this.$refs.audio.play()
+            break;
+          case 3:
+            this.$refs.audio.src = require("@/assets/audio/3.mp3")
+            this.$refs.audio.pause()
+            this.$refs.audio.currentTime = 0
+            this.$refs.audio.play()
+            break;
+          case 4:
+            this.$refs.audio.src = require("@/assets/audio/4.mp3")
+            this.$refs.audio.pause()
+            this.$refs.audio.currentTime = 0
+            this.$refs.audio.play()
+            break;
+        }
+    }
 
   }
 }
@@ -188,6 +225,7 @@ export default {
 
   $white: #fff
   $border: #7a9194
+  $gray: #ccc
 
   $hovElloy: #f3f379
   $hovGreen: #b9e0b9
@@ -225,7 +263,6 @@ export default {
   .top-right-panel 
     border-top-right-radius: 100%
     background-color: green
-
   .top-left-panel 
     border-top-left-radius: 100%
     background-color: yellow
@@ -237,7 +274,9 @@ export default {
   .bottom-left-panel 
     border-bottom-left-radius: 100%
     background-color: blue
-
+  .buttons_bottom
+    position: relative
+    top: -4px
   .radio
     display: inline-block
     width: 90%
