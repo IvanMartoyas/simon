@@ -141,8 +141,10 @@ export default {
 
       let i = 0;
       let intervalID = setInterval(function(){
+
         if( i > self.series.length) {
           clearInterval(intervalID);
+          self.allowInput = true;
         }
         self.resetHov()
 
@@ -166,7 +168,6 @@ export default {
    
       }, this.time)
 
-      this.allowInput = true
     },
     startGame() {
       // console.log()
