@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <audio ref="audio" :src="sound_path"></audio>
+    <audio ref="audio"></audio>
 
     <div>
       <div 
@@ -70,7 +70,6 @@ export default {
         ishovRed: false,
         difficlty: 1,
         time: 1500,
-        sound_path: ''
       }
   },
   watch: {
@@ -119,7 +118,6 @@ export default {
       this.allowInput = false
       this.seriesCount = 1
       this.gameOver = false
-      this.sound_path = ''
     },
     resetHov(){
       this.isElloy = false;
