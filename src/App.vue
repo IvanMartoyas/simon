@@ -110,6 +110,9 @@ export default {
         else {// если нажата непрвильная кнопка то конец игры
           this.allowInput = false;
           this.gameOver = true;
+          setTimeout(()=>{
+            this.gameOver = false;
+          },4000)
         }
     },
     reset() {// сброс настроек
